@@ -57,15 +57,15 @@ const errorHandler = (err, req, res, next) => {
 };
 
 // Multer error handler
-// const multerErrorHandler = (err, req, res, next) => {
-//   if (err instanceof multer.MulterError) {
-//     // Handle Multer-specific errors
-//     return res.status(400).json({ message: err.message });
-//   } else if (err) {
-//     // Handle other errors
-//     return res.status(500).json({ message: "An unexpected error occurred" });
-//   }
-//   next();
-// };
+const multerErrorHandler = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    // Handle Multer-specific errors
+    return res.status(400).json({ message: err.message });
+  } else if (err) {
+    // Handle other errors
+    return res.status(500).json({ message: "An unexpected error occurred" });
+  }
+  next();
+};
 
-export { notFound, errorHandler };
+export { notFound, errorHandler, multerErrorHandler };

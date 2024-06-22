@@ -1,8 +1,13 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import User from "../models/User.model.js";
 import Notification from "../models/notification.model.js";
-import { v2 as cloudinary } from "cloudinary";
+import { cloudinary, storageForProfile } from "../config/cloudinary.js";
 import bcrypt from "bcrypt";
+import multer from "multer";
+
+export const uploadProfile = multer({
+  storageForProfile,
+});
 
 // desc Get Users Profile
 // route GET api/users/profile/:username
@@ -30,10 +35,9 @@ export const getUsersProfile = asyncHandler(async (req, res, next) => {
 export const followUnFollowUsers = asyncHandler(async (req, res, next) => {
   try {
     const { id } = req.params;
-    const user = await User.findOne({ _id: req.user._id });
-    const targetedUser = await User.findOne({ _id: id });
+    const user = await User.findById(req.user._id);
 
-    if (!user || !targetedUser) {
+    if (!user) {
       res.status(404);
       throw new Error("User not found");
     }
@@ -41,23 +45,24 @@ export const followUnFollowUsers = asyncHandler(async (req, res, next) => {
     const existUser = user.following.includes(id);
 
     if (existUser) {
-      // await User.findByIdAndUpdate(req.user._id, {$pull: {followers: id}}) // You can also use this method to push or pull followers
-      user.following.pull(id);
-      await user.save();
-      // await User.findByIdAndUpdate(id, {$pull: {followers: req.user._id}}) // You can also use this method to push or pull followers
-      targetedUser.followers.pull(req.user._id);
-      await targetedUser.save();
-      res.json({ message: "Unfollowed user" });
+      await User.findByIdAndUpdate(req.user._id, { $pull: { following: id } });
+
+      await User.findByIdAndUpdate(id, { $pull: { followers: req.user._id } });
+
+      await Notification.deleteMany({
+        type: "follow",
+        from: req.user._id,
+        to: id,
+      });
+
+      res.status(200).json({ message: "User UnFollowed successfully" });
     } else {
-      // await User.findByIdAndUpdate(req.user_id, {$push: {following: id}}) // You can also use this method to push or pull followers
-      user.following.push(id);
-      await user.save();
-      //   await User.findByIdAndUpdate(id, {$push: {followers: req.user._id}}) // You can also use this method to push or pull followers
-      targetedUser.followers.push(req.user._id);
-      await targetedUser.save();
+      await User.findByIdAndUpdate(req.user._id, { $push: { following: id } });
+
+      await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } });
 
       const newNotification = new Notification({
-        type: "Follow",
+        type: "follow",
         from: req.user._id,
         to: id,
       });
@@ -120,31 +125,31 @@ export const updateUsers = asyncHandler(async (req, res, next) => {
       link,
     } = req.body;
 
-    const { profileImg, coverImg } = req.body;
-
     const user = await User.findById(req.user._id);
     if (!user) {
       res.status(404);
       throw new Error("User not found");
     }
-
-    if (profileImg) {
-      if (user.profileImg) {
-        await cloudinary.uploader.destroy(
-          user.profileImg.split("/").pop().split(".")[0]
-        );
+    if (req.files) {
+      const { profileImg, coverImg } = req.files;
+      if (profileImg) {
+        if (user.profileImg) {
+          await cloudinary.uploader.destroy(
+            user.profileImg.split("/").pop().split(".")[0]
+          );
+        }
+        const uploadedResponse = await cloudinary.uploader.upload(profileImg);
+        profileImg = uploadedResponse.secure_url;
       }
-      const uploadedResponse = await cloudinary.uploader.upload(profileImg);
-      profileImg = uploadedResponse.secure_url;
-    }
-    if (coverImg) {
-      if (user.coverImg) {
-        await cloudinary.uploader.destroy(
-          user.coverImg.split("/").pop().split(".")[0]
-        );
+      if (coverImg) {
+        if (user.coverImg) {
+          await cloudinary.uploader.destroy(
+            user.coverImg.split("/").pop().split(".")[0]
+          );
+        }
+        const uploadedResponse = await cloudinary.uploader.upload(coverImg);
+        coverImg = uploadedResponse.secure_url;
       }
-      const uploadedResponse = await cloudinary.uploader.upload(coverImg);
-      coverImg = uploadedResponse.secure_url;
     }
 
     user.fullName = fullName || user.fullName;
@@ -184,43 +189,43 @@ export const updateUsers = asyncHandler(async (req, res, next) => {
   }
 });
 
-export const uploadImage = async (req, res) => {
-  try {
-    const file = req.files.image; // Assuming the image file is sent as 'image' in form-data
+// export const uploadImage = async (req, res) => {
+//   try {
+//     const file = req.files.image; // Assuming the image file is sent as 'image' in form-data
 
-    // Validate file format
-    const allowedFormats = ["jpg", "png", "webp"];
-    const fileExtension = file.name.split(".").pop().toLowerCase();
+//     // Validate file format
+//     const allowedFormats = ["jpg", "png", "webp"];
+//     const fileExtension = file.name.split(".").pop().toLowerCase();
 
-    if (!allowedFormats.includes(fileExtension)) {
-      return res.status(400).json({ message: "Invalid file format" });
-    }
+//     if (!allowedFormats.includes(fileExtension)) {
+//       return res.status(400).json({ message: "Invalid file format" });
+//     }
 
-    // Upload the image to Cloudinary with folder and allowed formats
-    const result = await cloudinary.uploader.upload(file.tempFilePath, {
-      folder: "uploads", // Specify the folder
-      allowed_formats: ["jpg", "png", "webp"], // Specify allowed formats
-      use_filename: true,
-      unique_filename: false,
-    });
+//     // Upload the image to Cloudinary with folder and allowed formats
+//     const result = await cloudinary.uploader.upload(file.tempFilePath, {
+//       folder: "uploads", // Specify the folder
+//       allowed_formats: ["jpg", "png", "webp"], // Specify allowed formats
+//       use_filename: true,
+//       unique_filename: false,
+//     });
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      res.status(404);
-      throw new Error("User not found");
-    }
+//     const user = await User.findById(req.user._id);
+//     if (!user) {
+//       res.status(404);
+//       throw new Error("User not found");
+//     }
 
-    user.profileImage = result.secure_url; // Save the image URL in the user document
-    await user.save();
+//     user.profileImage = result.secure_url; // Save the image URL in the user document
+//     await user.save();
 
-    res.status(200).json({
-      message: "Image uploaded successfully",
-      imageUrl: result.secure_url,
-    });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "Image upload failed", error: error.message });
-  }
-};
+//     res.status(200).json({
+//       message: "Image uploaded successfully",
+//       imageUrl: result.secure_url,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res
+//       .status(500)
+//       .json({ message: "Image upload failed", error: error.message });
+//   }
+// };

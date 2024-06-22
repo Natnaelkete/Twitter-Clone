@@ -7,7 +7,12 @@ import cors from "cors";
 import connectDb from "./config/DB.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
-import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import postsRoutes from "./routes/post.routes.js";
+import {
+  notFound,
+  errorHandler,
+  multerErrorHandler,
+} from "./middleware/errorMiddleware.js";
 
 const port = process.env.PORT || 5000;
 
@@ -21,9 +26,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
+app.use(multerErrorHandler);
 
 app.listen(8000, () => {
   console.log(`server is running on port ${port}`);
