@@ -241,4 +241,24 @@ export const getUsersPost = asyncHandler(async (req, res, next) => {
   }
 });
 
+// desc get Users Profile
+// route POST api/post/users/profile/:username
+// access Private
+export const getUsersProfile = asyncHandler(async (req, res, next) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username })
+      .select("-password, -passwordResetToke, -passwordResetExpires")
+      .exec();
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    console.log(err.message);
+    next(err);
+  }
+});
+
 export { uploadPost };

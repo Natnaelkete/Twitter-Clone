@@ -5,9 +5,9 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import connectDb from "./config/DB.js";
-import authRoutes from "./routes/auth.routes.js";
-import userRoutes from "./routes/user.routes.js";
-import postsRoutes from "./routes/post.routes.js";
+import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
+import postsRoutes from "./routes/post.route.js";
 import {
   notFound,
   errorHandler,
