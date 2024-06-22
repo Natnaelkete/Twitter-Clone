@@ -8,6 +8,7 @@ import connectDb from "./config/DB.js";
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import postsRoutes from "./routes/post.route.js";
+import notificationRoutes from "./routes/notification.route.js";
 import {
   notFound,
   errorHandler,
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postsRoutes);
+app.use("/api/notification", notificationRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
