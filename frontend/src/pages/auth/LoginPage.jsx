@@ -5,16 +5,24 @@ import XSvg from "../../components/svgs/X";
 
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
+import useMutationsCollections from "../../hooks/useMutationsCollection";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
+  const { login, isLogging } = useMutationsCollections();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+
+    login(formData, {
+      onSuccess: (data) => {
+        console.log(data);
+      },
+    });
   };
 
   const handleInputChange = (e) => {
@@ -37,10 +45,10 @@ const LoginPage = () => {
             <input
               type="text"
               className="grow"
-              placeholder="username"
-              name="username"
+              placeholder="email"
+              name="email"
               onChange={handleInputChange}
-              value={formData.username}
+              value={formData.email}
             />
           </label>
 
@@ -56,7 +64,7 @@ const LoginPage = () => {
             />
           </label>
           <button className="btn rounded-full btn-primary text-white">
-            Login
+            {isLogging ? "Loading..." : "Login"}
           </button>
           {isError && <p className="text-red-500">Something went wrong</p>}
         </form>
@@ -64,7 +72,7 @@ const LoginPage = () => {
           <p className="text-white text-lg">{"Don't"} have an account?</p>
           <Link to="/signup">
             <button className="btn rounded-full btn-primary text-white btn-outline w-full">
-              Sign up
+              Signup
             </button>
           </Link>
         </div>

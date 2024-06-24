@@ -7,6 +7,7 @@ import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
+import useMutationsCollections from "../../hooks/useMutationsCollection";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -14,11 +15,17 @@ const SignUpPage = () => {
     username: "",
     fullName: "",
     password: "",
+    passwordConfirm: "",
   });
+  const { signup, isSigningup } = useMutationsCollections();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    signup(formData, {
+      onSuccess: (data) => {
+        console.log(data);
+      },
+    });
   };
 
   const handleInputChange = (e) => {
@@ -85,8 +92,19 @@ const SignUpPage = () => {
               value={formData.password}
             />
           </label>
+          <label className="input input-bordered rounded flex items-center gap-2">
+            <MdPassword />
+            <input
+              type="password"
+              className="grow focus:outline-none"
+              placeholder="Repeat the password"
+              name="passwordConfirm"
+              onChange={handleInputChange}
+              value={formData.passwordConfirm}
+            />
+          </label>
           <button className="btn rounded-full btn-primary text-white">
-            Sign up
+            {isSigningup ? "Loading..." : "Sign up"}
           </button>
           {isError && <p className="text-red-500">Something went wrong</p>}
         </form>
