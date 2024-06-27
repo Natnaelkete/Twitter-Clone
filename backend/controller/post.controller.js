@@ -7,6 +7,7 @@ import User from "../models/User.model.js";
 
 const uploadPost = multer({
   storage: storageForPost,
+  limits: { fileSize: 2 * 1024 * 1024 },
 });
 
 // desc Create Post
@@ -57,7 +58,7 @@ export const deletePost = asyncHandler(async (req, res, next) => {
 
     if (post.img.length > 0) {
       for (const img of post.img) {
-        const publicId = img.split("/").pop().split(".")[0];
+        const publicId = `Twitter_Post/${img.split("/").pop().split(".")[0]}`;
         await cloudinary.uploader.destroy(publicId);
       }
     }
@@ -247,9 +248,7 @@ export const getUsersPost = asyncHandler(async (req, res, next) => {
 export const getUsersProfile = asyncHandler(async (req, res, next) => {
   try {
     const { username } = req.params;
-    const user = await User.findOne({ username })
-      .select("-password, -passwordResetToke, -passwordResetExpires")
-      .exec();
+    const user = await User.findOne({ username }).select("-password").exec();
     if (!user) {
       res.status(404);
       throw new Error("User not found");

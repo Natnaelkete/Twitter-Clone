@@ -23,7 +23,6 @@ const storageForPost = new CloudinaryStorage({
   params: {
     folder: "Twitter_Post",
     allowed_formats: ["jpg", "png", "webp"],
-    public_id: (req, file) => file.originalname.split(".")[0],
   },
 });
 

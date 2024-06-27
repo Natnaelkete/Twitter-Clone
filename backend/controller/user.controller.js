@@ -6,7 +6,8 @@ import bcrypt from "bcrypt";
 import multer from "multer";
 
 export const uploadProfile = multer({
-  storageForProfile,
+  storage: storageForProfile,
+  limits: { fileSize: 2 * 1024 * 1024 },
 });
 
 // desc Get Users Profile
@@ -135,7 +136,9 @@ export const updateUsers = asyncHandler(async (req, res, next) => {
       if (profileImg) {
         if (user.profileImg) {
           await cloudinary.uploader.destroy(
-            user.profileImg.split("/").pop().split(".")[0]
+            `Twitter_profile/cover/${
+              user.profileImg.split("/").pop().split(".")[0]
+            }`
           );
         }
         const uploadedResponse = await cloudinary.uploader.upload(profileImg);
@@ -144,7 +147,9 @@ export const updateUsers = asyncHandler(async (req, res, next) => {
       if (coverImg) {
         if (user.coverImg) {
           await cloudinary.uploader.destroy(
-            user.coverImg.split("/").pop().split(".")[0]
+            `Twitter_profile/cover/${
+              user.coverImg.split("/").pop().split(".")[0]
+            }`
           );
         }
         const uploadedResponse = await cloudinary.uploader.upload(coverImg);
