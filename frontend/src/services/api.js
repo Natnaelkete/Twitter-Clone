@@ -63,3 +63,40 @@ export async function getFollowing() {
     throw new Error(error);
   }
 }
+
+export async function getPosts() {
+  try {
+    const { data } = await axios.get(`/api/posts/all`);
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function CreatePosts(formData) {
+  try {
+    const { data } = await axios.post(`/api/posts/create`, formData);
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function DeletePosts(id) {
+  try {
+    const { data } = await axios.delete(`/api/posts/delete/${id}`);
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function GetUserProfile(username) {
+  console.log(username);
+  try {
+    const { data } = await axios.get(`/api/posts/user/profile/${username}`);
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}

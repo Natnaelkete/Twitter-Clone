@@ -1,8 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Suggested, getFollowing, getMyProfile } from "../services/api";
+import {
+  GetUserProfile,
+  Suggested,
+  getFollowing,
+  getMyProfile,
+  getPosts,
+} from "../services/api";
 
-function useQueriesCollections() {
+function useQueriesCollections(username) {
   // Get SuggestedUsers
   const { data: suggestedUsers, isLoading: isGettingSuggestion } = useQuery({
     queryKey: ["suggestedUsers"],
@@ -24,6 +30,22 @@ function useQueriesCollections() {
     onError: (err) => toast.error(err.response.data.message),
   });
 
+  // Get All Posts
+  const { data: posts, isLoading: isGettingPosts } = useQuery({
+    queryKey: ["posts"],
+    queryFn: getPosts,
+    onError: (err) => toast.error(err.response.data.message),
+  });
+
+  // Get Users Profile
+  const { data: userProfile, isLoading: isGettingUserProfile } = useQuery({
+    queryKey: ["userProfile", username],
+    queryFn: ({ username }) => {
+      GetUserProfile(username);
+    },
+    onError: (err) => toast.error(err.response.data.message),
+  });
+
   return {
     suggestedUsers,
     isGettingSuggestion,
@@ -31,6 +53,10 @@ function useQueriesCollections() {
     isGettingMyProfile,
     following,
     isGettingFollowing,
+    posts,
+    isGettingPosts,
+    userProfile,
+    isGettingUserProfile,
   };
 }
 

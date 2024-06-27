@@ -4,7 +4,7 @@ import useQueriesCollections from "../../hooks/useQueriesCollections";
 import useMutationsCollections from "../../hooks/useMutationsCollection";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../common/LoadingSpinner";
-import { useState } from "react";
+// import { useState } from "react";
 
 const RightPanel = () => {
   // const [followingUserId, setFollowingUserId] = useState('')
@@ -55,10 +55,11 @@ const RightPanel = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       // setFollowingUserId(user._id)
+                      console.log(user._id);
                       follow(user._id, {
-                        onSuccess: () => {
+                        onSuccess: (data) => {
                           // setFollowedUserId(data)
-                          toast.success(`${user.username} is now your friend`);
+                          toast.success(`${user.username} ${data.message}`);
                         },
                       });
                     }}

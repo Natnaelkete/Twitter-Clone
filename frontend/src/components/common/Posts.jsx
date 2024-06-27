@@ -1,25 +1,24 @@
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
-import { POSTS } from "../utils/db/dummy";
+import useQueriesCollections from "../../hooks/useQueriesCollections";
 
 const Posts = () => {
-  const isLoading = false;
-
+  const { posts, isGettingPosts } = useQueriesCollections();
   return (
     <>
-      {isLoading && (
+      {isGettingPosts && (
         <div className="flex flex-col justify-center">
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />
         </div>
       )}
-      {!isLoading && POSTS?.length === 0 && (
+      {!isGettingPosts && posts?.length === 0 && (
         <p className="text-center my-4">No posts in this tab. Switch 👻</p>
       )}
-      {!isLoading && POSTS && (
-        <div>
-          {POSTS.map((post) => (
+      {!isGettingPosts && posts && (
+        <div className="w-full">
+          {posts.map((post) => (
             <Post key={post._id} post={post} />
           ))}
         </div>

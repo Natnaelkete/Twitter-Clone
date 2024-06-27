@@ -6,6 +6,7 @@ import XSvg from "../../components/svgs/X";
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
 import useMutationsCollections from "../../hooks/useMutationsCollection";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -19,9 +20,7 @@ const LoginPage = () => {
     e.preventDefault();
 
     login(formData, {
-      onSuccess: (data) => {
-        console.log(data);
-      },
+      onSuccess: () => {},
     });
   };
 
@@ -44,7 +43,7 @@ const LoginPage = () => {
             <MdOutlineMail />
             <input
               type="text"
-              className="grow"
+              className="grow focus:outline-none"
               placeholder="email"
               name="email"
               onChange={handleInputChange}
@@ -56,7 +55,7 @@ const LoginPage = () => {
             <MdPassword />
             <input
               type="password"
-              className="grow"
+              className="grow focus:outline-none"
               placeholder="Password"
               name="password"
               onChange={handleInputChange}
@@ -64,7 +63,7 @@ const LoginPage = () => {
             />
           </label>
           <button className="btn rounded-full btn-primary text-white">
-            {isLogging ? "Loading..." : "Login"}
+            {isLogging ? <LoadingSpinner size="sm" /> : "Login"}
           </button>
           {isError && <p className="text-red-500">Something went wrong</p>}
         </form>

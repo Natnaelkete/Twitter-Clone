@@ -4,7 +4,7 @@ import RightPanel from "../components/common/RightPanel";
 
 function AppLayout() {
   return (
-    <div className="flex">
+    <div className="flex w-full">
       <Sidebar />
       <div className="flex-1 p-4">
         <Outlet />
