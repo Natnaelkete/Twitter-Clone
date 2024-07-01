@@ -225,7 +225,7 @@ export const getUsersPost = asyncHandler(async (req, res, next) => {
       throw new Error("User not found");
     }
 
-    const getPost = await Post.findOne({ user: user._id })
+    const getPost = await Post.find({ user: user._id })
       .sort({ createdAt: -1 })
       .populate("user", "-password")
       .populate("comments.user", "-password")

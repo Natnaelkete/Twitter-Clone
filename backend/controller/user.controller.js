@@ -116,35 +116,36 @@ export const getSuggestedUsers = asyncHandler(async (req, res, next) => {
 // access Private
 export const updateUsers = asyncHandler(async (req, res, next) => {
   try {
-    const {
-      fullName,
-      username,
-      email,
-      currentPassword,
-      newPassword,
-      bio,
-      link,
-    } = req.body;
+    const { formData } = req.body;
+    console.log(req.file);
+    console.log(req.files);
 
     const user = await User.findById(req.user._id);
     if (!user) {
       res.status(404);
       throw new Error("User not found");
     }
+
     if (req.files) {
       const { profileImg, coverImg } = req.files;
+
       if (profileImg) {
+        const profileImgFile = profileImg[0];
         if (user.profileImg) {
           await cloudinary.uploader.destroy(
-            `Twitter_profile/cover/${
+            `Twitter_profile/profile/${
               user.profileImg.split("/").pop().split(".")[0]
             }`
           );
         }
-        const uploadedResponse = await cloudinary.uploader.upload(profileImg);
-        profileImg = uploadedResponse.secure_url;
+        const uploadedResponse = await cloudinary.uploader.upload(
+          profileImgFile.path
+        );
+        user.profileImg = uploadedResponse.secure_url;
       }
+
       if (coverImg) {
+        const coverImgFile = coverImg[0];
         if (user.coverImg) {
           await cloudinary.uploader.destroy(
             `Twitter_profile/cover/${
@@ -152,33 +153,35 @@ export const updateUsers = asyncHandler(async (req, res, next) => {
             }`
           );
         }
-        const uploadedResponse = await cloudinary.uploader.upload(coverImg);
-        coverImg = uploadedResponse.secure_url;
+        const uploadedResponse = await cloudinary.uploader.upload(
+          coverImgFile.path
+        );
+        user.coverImg = uploadedResponse.secure_url;
       }
     }
 
-    user.fullName = fullName || user.fullName;
-    user.username = username || user.username;
-    user.email = email || user.email;
-    user.bio = bio || user.bio;
-    user.link = link || user.link;
-    user.profileImg = profileImg || user.profileImg;
-    user.coverImg = coverImg || user.coverImg;
+    user.fullName = formData.fullName || user.fullName;
+    user.username = formData.username || user.username;
+    user.email = formData.email || user.email;
+    user.bio = formData.bio || user.bio;
+    user.link = formData.link || user.link;
 
-    if (currentPassword && newPassword) {
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (formData.currentPassword && formData.newPassword) {
+      const isMatch = await bcrypt.compare(
+        formData.currentPassword,
+        user.password
+      );
       if (!isMatch) {
         res.status(400);
         throw new Error("The current password is incorrect");
       }
-
-      user.password = newPassword;
-    } else if (currentPassword || newPassword) {
+      user.password = formData.newPassword;
+    } else if (formData.currentPassword || formData.newPassword) {
       res.status(400);
       throw new Error("Provide both current and new password");
     }
 
-    const updatedUser = await user.save();
+    const updatedUser = await user.save({ validateBeforeSave: false });
 
     res.status(200).json({
       _id: updatedUser._id,

@@ -9,7 +9,7 @@ export const getNotification = asyncHandler(async (req, res, next) => {
       .populate("to", "username profileImg");
 
     if (!notification || notification.length === 0) {
-      return res.status(200).json({ message: "No notification", data: [] });
+      return res.status(200).json([]);
     }
 
     await Notification.updateMany({ to: req.user._id }, { read: true });
