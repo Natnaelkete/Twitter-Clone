@@ -1,47 +1,54 @@
 import { useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import Posts from "../../components/common/Posts";
 import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
 import EditProfileModal from "./EditProfileModal";
-
-import { POSTS } from "../../components/utils/db/dummy";
+import { formatMemberSinceDate } from "../../components/utils/date/index";
 
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import useQueriesCollections from "../../hooks/useQueriesCollections";
+import useMutationsCollections from "../../hooks/useMutationsCollection";
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [feedType, setFeedType] = useState("posts");
-  const { pathname } = useLocation();
-  const username = "meki";
 
-  const { userProfile, isGettingUserProfile, myProfile } =
-    useQueriesCollections(username);
-  console.log(userProfile);
+  const { username } = useParams();
+  const POST_ENDPOINT = `/api/posts/user/${username}`;
+
+  const { updateProfile, isUpdatingProfile, follow, isFollowing } =
+    useMutationsCollections();
+
+  const { userProfile, isGettingUserProfile, myProfile, getData } =
+    useQueriesCollections({ username, POST_ENDPOINT });
 
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
   // const isGettingUserProfile = false;
   const isMyProfile = userProfile?._id === myProfile?._id;
-  console.log(isMyProfile);
+  const isAlreadyFollowed = myProfile.following.some(
+    (id) => id === userProfile?._id
+  );
 
-  // const userProfile = {
-  //   _id: "1",
-  //   fullName: "John Doe",
-  //   username: "johndoe",
-  //   profileImg: "/avatars/boy2.png",
-  //   coverImg: "/cover.png",
-  //   bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  //   link: "https://youtube.com/@asaprogrammer_",
-  //   following: ["1", "2", "3"],
-  //   followers: ["1", "2", "3"],
-  // };
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    if (profileImg) formData.append("profileImg", profileImg);
+    if (coverImg) formData.append("coverImg", coverImg);
+
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}, ${pair[1]}`);
+    }
+
+    updateProfile(formData);
+  }
 
   const handleImgChange = (e, state) => {
     const file = e.target.files[0];
@@ -73,7 +80,7 @@ const ProfilePage = () => {
                 <div className="flex flex-col">
                   <p className="font-bold text-lg">{userProfile?.fullName}</p>
                   <span className="text-sm text-slate-500">
-                    {POSTS?.length} posts
+                    {getData?.length} posts
                   </span>
                 </div>
               </div>
@@ -95,6 +102,7 @@ const ProfilePage = () => {
 
                 <input
                   type="file"
+                  name="profileImg"
                   hidden
                   accept="image/*"
                   ref={coverImgRef}
@@ -102,6 +110,7 @@ const ProfilePage = () => {
                 />
                 <input
                   type="file"
+                  name="coverImg"
                   hidden
                   accept="image/*"
                   ref={profileImgRef}
@@ -133,17 +142,28 @@ const ProfilePage = () => {
                 {!isMyProfile && (
                   <button
                     className="btn btn-outline rounded-full btn-sm"
-                    onClick={() => alert("Followed successfully")}
+                    onClick={() => follow(userProfile?._id)}
                   >
-                    Follow
+                    {isAlreadyFollowed ? (
+                      isFollowing ? (
+                        <div className="loading loading-spinner loading-sm"></div>
+                      ) : (
+                        "Unfollow"
+                      )
+                    ) : isFollowing ? (
+                      <div className="loading loading-spinner loading-sm"></div>
+                    ) : (
+                      "Follow"
+                    )}
                   </button>
                 )}
                 {(coverImg || profileImg) && (
                   <button
+                    disabled={isUpdatingProfile}
                     className="btn btn-primary rounded-full btn-sm text-white px-4 ml-2"
-                    onClick={() => alert("Profile updated successfully")}
+                    onClick={handleSubmit}
                   >
-                    Update
+                    {isUpdatingProfile ? "Updating..." : "Update"}
                   </button>
                 )}
               </div>
@@ -170,7 +190,7 @@ const ProfilePage = () => {
                           rel="noreferrer"
                           className="text-sm text-blue-500 hover:underline"
                         >
-                          youtube.com/@asaprogrammer_
+                          {userProfile.link}
                         </a>
                       </>
                     </div>
@@ -178,7 +198,7 @@ const ProfilePage = () => {
                   <div className="flex gap-2 items-center">
                     <IoCalendarOutline className="w-4 h-4 text-slate-500" />
                     <span className="text-sm text-slate-500">
-                      Joined July 2021
+                      {formatMemberSinceDate(userProfile.createdAt)}
                     </span>
                   </div>
                 </div>
@@ -220,7 +240,11 @@ const ProfilePage = () => {
             </>
           )}
 
-          <Posts />
+          <Posts
+            feedType={feedType}
+            username={username}
+            userId={userProfile?._id}
+          />
         </div>
       </div>
     </>

@@ -1,11 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  CommentOnPost,
   CreatePosts,
+  DeleteNotification,
   DeletePosts,
   Follow,
+  Like,
   Login,
   Logout,
   Signup,
+  UpdateProfile,
 } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +35,10 @@ function useMutationsCollections() {
       queryClient.invalidateQueries(["loggedUser"]);
       navigate("/", { replace: true });
     },
-    onError: (err) => toast.error(err.response.data.message),
+    onError: (err) => {
+      toast.error(err.response.data.message || "Invalid email or password");
+      console.log("Invalid email or password");
+    },
   });
 
   // Logout
@@ -78,6 +85,44 @@ function useMutationsCollections() {
     onError: (err) => toast.error(err.response.data.message),
   });
 
+  // Update Profile
+  const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
+    mutationFn: (formData) => UpdateProfile(formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      toast.success("Updated");
+    },
+    onError: (err) => toast.error(err.response.data.message),
+  });
+
+  // Comment on posts
+  const { mutate: commentOnPost, isPending: isCommenting } = useMutation({
+    mutationFn: ({ postId, text }) => CommentOnPost(postId, text),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["comment"]);
+    },
+    onError: (err) => toast.error(err.response.data.message),
+  });
+
+  // Comment on posts
+  const { mutate: like, isPending: isLiking } = useMutation({
+    mutationFn: (id) => Like(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["like"]);
+    },
+    onError: (err) => toast.error(err.response.data.message),
+  });
+
+  // Delete all notification
+  const { mutate: deleteNotifications, isPending: isDeletingNotifications } =
+    useMutation({
+      mutationFn: DeleteNotification,
+      onSuccess: () => {
+        queryClient.invalidateQueries(["notification"]);
+      },
+      onError: (err) => toast.error(err.response.data.message),
+    });
+
   return {
     signup,
     isSigningup,
@@ -92,6 +137,14 @@ function useMutationsCollections() {
     error,
     deletePost,
     isDeletingPost,
+    updateProfile,
+    isUpdatingProfile,
+    commentOnPost,
+    isCommenting,
+    like,
+    isLiking,
+    deleteNotifications,
+    isDeletingNotifications,
   };
 }
 

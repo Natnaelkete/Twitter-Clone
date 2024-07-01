@@ -54,8 +54,6 @@ const RightPanel = () => {
                     className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm"
                     onClick={(e) => {
                       e.preventDefault();
-                      // setFollowingUserId(user._id)
-                      console.log(user._id);
                       follow(user._id, {
                         onSuccess: (data) => {
                           // setFollowedUserId(data)

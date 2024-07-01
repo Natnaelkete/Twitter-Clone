@@ -7,24 +7,31 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import useMutationsCollections from "../../hooks/useMutationsCollection";
 import useQueriesCollection from "../../hooks/useQueriesCollections";
+import { formatPostDate } from "../utils/date";
 // import { formatPostDate } from "../utils/date";
 
 const Post = ({ post }) => {
-  const [comment, setComment] = useState("");
+  const [text, setText] = useState("");
   const { myProfile } = useQueriesCollection();
-  const { deletePost } = useMutationsCollections();
+  const { deletePost, like } = useMutationsCollections();
+  const { commentOnPost, isCommenting } = useMutationsCollections();
+  const postId = post._id;
 
-  const isLiked = false;
+  const isLiked = myProfile.likedPosts.some((id) => id === post._id);
 
   const isMyPost = myProfile?._id === post.user._id;
 
-  // const formattedDate = formatPostDate(post.createdAt);
+  const formattedDate = formatPostDate(post.createdAt);
 
   const handlePostComment = (e) => {
     e.preventDefault();
+
+    commentOnPost({ postId, text });
   };
 
-  const handleLikePost = () => {};
+  const handleLikePost = () => {
+    like(post._id);
+  };
 
   return (
     <>
@@ -47,7 +54,7 @@ const Post = ({ post }) => {
                 @{post.user.username}
               </Link>
               <span>·</span>
-              {/* <span>{formattedDate}</span> */}
+              <span>{formattedDate}</span>
             </span>
             {isMyPost && (
               <span className="flex justify-end flex-1">
@@ -134,15 +141,15 @@ const Post = ({ post }) => {
                     <textarea
                       className="textarea w-full p-1 rounded text-md resize-none border focus:outline-none  border-gray-800"
                       placeholder="Add a comment..."
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
                     />
                     <button className="btn btn-primary rounded-full btn-sm text-white px-4">
-                      {/* {isCommenting ? (
+                      {isCommenting ? (
                         <span className="loading loading-spinner loading-md"></span>
                       ) : (
                         "Post"
-                      )} */}
+                      )}
                     </button>
                   </form>
                 </div>

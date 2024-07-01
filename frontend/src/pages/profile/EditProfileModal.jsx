@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useMutationsCollections from "../../hooks/useMutationsCollection";
 
 const EditProfileModal = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,8 @@ const EditProfileModal = () => {
     newPassword: "",
     currentPassword: "",
   });
+
+  const { updateProfile, isUpdatingProfile } = useMutationsCollections();
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,7 +35,9 @@ const EditProfileModal = () => {
             className="flex flex-col gap-4"
             onSubmit={(e) => {
               e.preventDefault();
-              alert("Profile updated successfully");
+
+              // updating the user Data here
+              updateProfile(formData);
             }}
           >
             <div className="flex flex-wrap gap-2">
@@ -96,8 +101,11 @@ const EditProfileModal = () => {
               name="link"
               onChange={handleInputChange}
             />
-            <button className="btn btn-primary rounded-full btn-sm text-white">
-              Update
+            <button
+              className="btn btn-primary rounded-full btn-sm text-white"
+              disabled={isUpdatingProfile}
+            >
+              {isUpdatingProfile ? "updating..." : "Update"}
             </button>
           </form>
         </div>

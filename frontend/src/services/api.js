@@ -92,9 +92,62 @@ export async function DeletePosts(id) {
 }
 
 export async function GetUserProfile(username) {
-  console.log(username);
   try {
     const { data } = await axios.get(`/api/posts/user/profile/${username}`);
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function UpdateProfile(formData) {
+  try {
+    const { data } = await axios.post(`/api/users/update`, { formData });
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function GetDataFromEndpoints(POST_ENDPOINT) {
+  try {
+    const { data } = await axios.get(` ${POST_ENDPOINT}`);
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function GetNotification() {
+  try {
+    const { data } = await axios.get(`api/notification`);
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function DeleteNotification() {
+  try {
+    const { data } = await axios.delete(`api/notification`);
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function CommentOnPost(postId, text) {
+  try {
+    const { data } = await axios.post(`api/posts/comment/${postId}`, { text });
+    return data;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+export async function Like(id) {
+  try {
+    const { data } = await axios.post(`api/posts/like/${id}`);
     return data;
   } catch (error) {
     throw new Error(error);

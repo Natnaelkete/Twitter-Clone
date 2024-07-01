@@ -4,32 +4,16 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
+import useQueriesCollections from "../../hooks/useQueriesCollections";
+import useMutationsCollections from "../../hooks/useMutationsCollection";
 
 const NotificationPage = () => {
-  const isLoading = false;
-  const notifications = [
-    {
-      _id: "1",
-      from: {
-        _id: "1",
-        username: "johndoe",
-        profileImg: "/avatars/boy2.png",
-      },
-      type: "follow",
-    },
-    {
-      _id: "2",
-      from: {
-        _id: "2",
-        username: "janedoe",
-        profileImg: "/avatars/girl1.png",
-      },
-      type: "like",
-    },
-  ];
+  const { notification, isGettingNotification } = useQueriesCollections();
+  const { deleteNotifications, isDeletingNotifications } =
+    useMutationsCollections();
 
-  const deleteNotifications = () => {
-    alert("All notifications deleted");
+  const deleteNotification = () => {
+    deleteNotifications();
   };
 
   return (
@@ -46,34 +30,38 @@ const NotificationPage = () => {
               className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li>
-                <a onClick={deleteNotifications}>Delete all notifications</a>
+                <a onClick={deleteNotification}>
+                  {isDeletingNotifications
+                    ? "Deleting..."
+                    : "Delete all notification"}
+                </a>
               </li>
             </ul>
           </div>
         </div>
-        {isLoading && (
+        {isGettingNotification && (
           <div className="flex justify-center h-full items-center">
             <LoadingSpinner size="lg" />
           </div>
         )}
-        {notifications?.length === 0 && (
-          <div className="text-center p-4 font-bold">No notifications 🤔</div>
+        {notification?.length === 0 && (
+          <div className="text-center p-4 font-bold">No notification 🤔</div>
         )}
-        {notifications?.map((notification) => (
-          <div className="border-b border-gray-700" key={notification._id}>
+        {notification?.map((notifications) => (
+          <div className="border-b border-gray-700" key={notifications._id}>
             <div className="flex gap-2 p-4">
-              {notification.type === "follow" && (
+              {notifications.type === "follow" && (
                 <FaUser className="w-7 h-7 text-primary" />
               )}
-              {notification.type === "like" && (
+              {notifications.type === "like" && (
                 <FaHeart className="w-7 h-7 text-red-500" />
               )}
-              <Link to={`/profile/${notification.from.username}`}>
+              <Link to={`/profile/${notifications.from.username}`}>
                 <div className="avatar">
                   <div className="w-8 rounded-full">
                     <img
                       src={
-                        notification.from.profileImg ||
+                        notifications.from.profileImg ||
                         "/avatar-placeholder.png"
                       }
                     />
@@ -81,9 +69,9 @@ const NotificationPage = () => {
                 </div>
                 <div className="flex gap-1">
                   <span className="font-bold">
-                    @{notification.from.username}
+                    @{notifications.from.username}
                   </span>{" "}
-                  {notification.type === "follow"
+                  {notifications.type === "follow"
                     ? "followed you"
                     : "liked your post"}
                 </div>

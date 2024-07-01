@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import {
+  GetDataFromEndpoints,
+  GetNotification,
   GetUserProfile,
   Suggested,
   getFollowing,
@@ -8,7 +10,7 @@ import {
   getPosts,
 } from "../services/api";
 
-function useQueriesCollections(username) {
+function useQueriesCollections({ POST_ENDPOINT, username } = {}) {
   // Get SuggestedUsers
   const { data: suggestedUsers, isLoading: isGettingSuggestion } = useQuery({
     queryKey: ["suggestedUsers"],
@@ -40,9 +42,25 @@ function useQueriesCollections(username) {
   // Get Users Profile
   const { data: userProfile, isLoading: isGettingUserProfile } = useQuery({
     queryKey: ["userProfile", username],
-    queryFn: ({ username }) => {
-      GetUserProfile(username);
-    },
+    queryFn: () => GetUserProfile(username),
+    enabled: !!username,
+    onError: (err) =>
+      toast.error(err.response?.data?.message || "An error occurred"),
+  });
+
+  // Get Data from the different endpoints
+  const { data: getData, isLoading: isGettingData } = useQuery({
+    queryKey: ["userData", POST_ENDPOINT],
+    queryFn: () => GetDataFromEndpoints(POST_ENDPOINT),
+    enabled: !!POST_ENDPOINT,
+    onError: (err) =>
+      toast.error(err.response?.data?.message || "An error occurred"),
+  });
+
+  // Get All Posts
+  const { data: notification, isLoading: isGettingNotification } = useQuery({
+    queryKey: ["notification"],
+    queryFn: GetNotification,
     onError: (err) => toast.error(err.response.data.message),
   });
 
@@ -57,6 +75,10 @@ function useQueriesCollections(username) {
     isGettingPosts,
     userProfile,
     isGettingUserProfile,
+    getData,
+    isGettingData,
+    notification,
+    isGettingNotification,
   };
 }
 
