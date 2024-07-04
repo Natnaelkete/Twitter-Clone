@@ -2,7 +2,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import User from "../models/User.model.js";
 import Notification from "../models/notification.model.js";
 import { cloudinary, storageForProfile } from "../config/cloudinary.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import multer from "multer";
 
 export const uploadProfile = multer({
